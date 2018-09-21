@@ -60,7 +60,7 @@ export default {
 
 ## Example
 
-### uppercod/atomico-starter-component
+### [uppercod/atomico-starter-component](https://github.com/uppercod/atomico-starter-component)
 
 It allows to create a component based on Atomico.
 
