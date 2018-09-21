@@ -32,6 +32,14 @@ It will delete the local repository.
 bone owner/name -r
 ```
 
+## Opción `-c | --clone`
+
+It allows to use a local source for cloning, avoiding the download from the git repository, it is useful to test the result of the template before loading it for example to github
+
+```
+bone owner/name -c -d my-copy
+```
+
 ## Template options
 
 ### bone.config.js

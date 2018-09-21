@@ -24,8 +24,11 @@ program
     .option("-d, --dist <directory>", "destination of the template")
     .option("-u, --update", "update the local source")
     .option("-r, --remove", "delete the local source")
-    .action((env, { dist = "", update, remove } = {}) => {
-        let source = path.resolve(__dirname, bones + env),
+    .option("-c, --clone", "allows you to use a local source for cloning")
+    .action((env, { dist = "", update, remove, clone } = {}) => {
+        let source = clone
+                ? path.resolve(process.cwd(), env)
+                : path.resolve(__dirname, bones + env),
             ready = loading(spinners.dots, "Preparing template folder");
         if (remove) {
             lstat(source)
@@ -34,15 +37,23 @@ program
             return;
         }
 
-        lstat(source)
-            .then(() => update && removedir(source).then(download(env, source)))
-            .catch(() => download(env, source))
-            .then(() => {
-                let sourceConfig = path.join(source, config);
-                return lstat(sourceConfig)
-                    .then(() => script(sourceConfig))
-                    .catch(() => {});
-            })
+        let pipe = lstat(source);
+
+        if (!clone) {
+            pipe = pipe
+                .then(
+                    () =>
+                        update && removedir(source).then(download(env, source))
+                )
+                .catch(() => download(env, source));
+        }
+
+        pipe.then(() => {
+            let sourceConfig = path.join(source, config);
+            return lstat(sourceConfig)
+                .then(() => script(sourceConfig))
+                .catch(() => {});
+        })
             .then(load => {
                 ready();
                 let fill = data => data,
