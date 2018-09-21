@@ -16,7 +16,7 @@ const script = require("esm")(module);
 const spinners = require("cli-spinners");
 
 program
-    .version("0.1.4")
+    .version("0.1.7")
     .usage("<git> [-d sample/dist]")
     .description(
         "bone, allows you to use folders templates extracted from git repositories"
@@ -29,33 +29,44 @@ program
         let source = clone
                 ? path.resolve(process.cwd(), env)
                 : path.resolve(__dirname, bones + env),
-            ready = loading(spinners.dots, "Preparing template folder");
+            log = loading(spinners.dots, "Preparing template folder");
         if (remove) {
             lstat(source)
                 .then(() => removedir(source))
-                .then(ready);
+                .then(() => log.clear(`\n${env} it has been removed`));
             return;
         }
 
-        let pipe = lstat(source);
+        let pipe = lstat(source),
+            load = () => {
+                log.update(`${env} downloading resource`);
+                return download(env, source);
+            };
 
         if (!clone) {
-            pipe = pipe
-                .then(
-                    () =>
-                        update && removedir(source).then(download(env, source))
-                )
-                .catch(() => download(env, source));
+            if (update) {
+                log.update(`\n${env} delete local copy`);
+                pipe = pipe
+                    .then(() => removedir(source))
+                    .then(() => log.update(`\n${env} it has been removed`))
+                    .then(load);
+            } else {
+                pipe = pipe.catch(load);
+            }
         }
 
-        pipe.then(() => {
-            let sourceConfig = path.join(source, config);
-            return lstat(sourceConfig)
-                .then(() => script(sourceConfig))
-                .catch(() => {});
+        pipe.catch(() => {
+            log.clear(`\n${env} resource does not exist`);
+            return Promise.reject();
         })
+            .then(() => {
+                let sourceConfig = path.join(source, config);
+                return lstat(sourceConfig)
+                    .then(() => script(sourceConfig))
+                    .catch(() => {});
+            })
             .then(load => {
-                ready();
+                log.clear();
                 let fill = data => data,
                     {
                         description = "",
@@ -79,17 +90,15 @@ program
             })
             .then(data => {
                 data = data || {};
-                let handler = () => {
-                    console.log(
-                        `\nProcess completed, check the folder: ${path.join(
-                            dist,
-                            data.$dist || ""
-                        )}`
-                    );
-                };
+                let folder = path.join(dist, data.$dist || ""),
+                    handler = () => {
+                        console.log(
+                            `Process completed, check the folder: ${folder}`
+                        );
+                    };
                 return template(
                     path.join(source, data.$source || ""),
-                    path.resolve(process.cwd(), dist, data.$dist || ""),
+                    path.resolve(process.cwd(), folder),
                     data,
                     [config]
                 )
@@ -120,5 +129,13 @@ function loading(spinner, message = "Loading") {
         const frames = spinner.frames;
         logUpdate(frames[(i = ++i % frames.length)] + " " + message);
     }, spinner.interval);
-    return () => clearInterval(interval);
+    return {
+        clear(nextMessage = "") {
+            clearInterval(interval);
+            logUpdate(nextMessage);
+        },
+        update(nextMessage) {
+            message = nextMessage;
+        }
+    };
 }
