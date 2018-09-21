@@ -1,0 +1,35 @@
+{
+  "name": "cli-bone",
+  "version": "0.1.4",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/uppercod/bonecli.git"
+  },
+  "keywords": [
+    "node",
+    "cli"
+  ],
+  "author": "Matias Trujillo",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/uppercod/bonecli/issues"
+  },
+  "homepage": "https://github.com/uppercod/bonecli#readme",
+  "dependencies": {
+    "cli-spinners": "^1.3.1",
+    "commander": "^2.18.0",
+    "download-git-repo": "^1.1.0",
+    "esm": "^3.0.84",
+    "log-update": "^2.3.0",
+    "prompts": "^1.1.1",
+    "template-folder": "^1.1.3"
+  },
+  "bin": {
+    "bone" : "./bone.js"
+  }
+}
