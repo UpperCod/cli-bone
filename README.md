@@ -57,3 +57,13 @@ export default {
 };
 
 ```
+
+## Example
+
+### uppercod/atomico-starter-component
+
+It allows to create a component based on Atomico.
+
+```
+bone uppercod/atomico-starter-component
+```
