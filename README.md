@@ -75,3 +75,11 @@ It allows to create a component based on Atomico.
 ```
 bone uppercod/atomico-starter-component
 ```
+
+### [uppercod/new-component](https://github.com/UpperCod/new-component)
+
+It allows to create a component based of Atomico, Preact or Preact with Cssthis.
+
+```
+bone uppercod/new-component
+```
