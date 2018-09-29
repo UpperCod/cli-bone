@@ -29,7 +29,8 @@ program
         let source = clone
                 ? path.resolve(process.cwd(), env)
                 : path.resolve(__dirname, bones + env),
-            log = loading(spinners.dots, "Preparing template folder");
+            log = loading(spinners.dots, "Preparing template folder"),
+            handlerFinalize;
         if (remove) {
             lstat(source)
                 .then(() => removedir(source))
@@ -72,17 +73,25 @@ program
                         description = "",
                         questions = [],
                         onCancel = fill,
-                        onSubmit = fill
+                        onSubmit = fill,
+                        onFinalize = fill
                     } = load ? load.default : {};
                 if (description) console.log("\n" + description + "\n");
                 if (questions.length) {
                     return new Promise((resolve, reject) => {
+                        let withCancel;
                         prompts(load.default.questions, {
                             onCancel(data) {
                                 onCancel(data);
                                 reject({});
+                                withCancel = true;
                             }
-                        }).then(data => resolve(onSubmit(data)));
+                        }).then(data => {
+                            if (!withCancel) {
+                                resolve(onSubmit(data));
+                                handlerFinalize = onFinalize;
+                            }
+                        });
                     });
                 } else {
                     return onSubmit({});
@@ -92,9 +101,13 @@ program
                 data = data || {};
                 let folder = path.join(dist, data.$dist || ""),
                     handler = () => {
-                        console.log(
-                            `Process completed, check the folder: ${folder}`
-                        );
+                        Promise.resolve(
+                            handlerFinalize ? handlerFinalize(data) : undefined
+                        ).then(() => {
+                            console.log(
+                                `Process completed, check the folder: ${folder}`
+                            );
+                        });
                     };
                 return template(
                     path.join(source, data.$source || ""),

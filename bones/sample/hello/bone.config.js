@@ -21,10 +21,16 @@ export default {
             initial: 0
         }
     ],
+    onCancel() {
+        console.log("😥 ups!");
+    },
     onSubmit(data) {
         data.folder = "folder";
         data.file = "file";
         data.$dist = data.name = data.name.replace(/[^\w]+/g, "-");
         return data;
+    },
+    onFinalize(data) {
+        console.log("🤟 ready!");
     }
 };
