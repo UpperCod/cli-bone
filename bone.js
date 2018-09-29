@@ -16,7 +16,7 @@ const script = require("esm")(module);
 const spinners = require("cli-spinners");
 
 program
-    .version("0.1.7")
+    .version("0.2.1")
     .usage("<git> [-d sample/dist]")
     .description(
         "bone, allows you to use folders templates extracted from git repositories"
